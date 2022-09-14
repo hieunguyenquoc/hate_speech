@@ -1,23 +1,18 @@
 import numpy as np
 import pandas as pd
 from keras.layers import Dense, Input, LSTM, Bidirectional, Conv1D
-from keras.layers import Dropout, Embedding
-from keras.preprocessing import text, sequence
+from keras.layers import Embedding
+from keras.preprocessing import text
 from keras.layers import GlobalMaxPooling1D, GlobalAveragePooling1D, concatenate, SpatialDropout1D
 from keras.models import Model
-from keras import backend as K
-from keras.models import model_from_json
 from keras.utils import pad_sequences
-
+import uvicorn
 
 EMBEDDING_FILE = 'Word Embedding/cc.vi.300.vec'
 train_x = pd.read_csv('Data/Train.csv').fillna(" ")
 # test_x = pd.read_csv('Data/Test.csv').fillna(" ")
 # print(type(test_x))
 # print(len(train_x))
-
-test_x = ["đánh chết cha mày giờ".lower()]
-
 max_features=7000
 maxlen=150
 embed_size=300
@@ -34,12 +29,9 @@ train_x = train_x['free_text'].str.lower()
 # Vectorize text + Prepare  Embedding
 tokenizer = text.Tokenizer(num_words=max_features, lower=True)
 tokenizer.fit_on_texts(list(train_x))
-train_x = tokenizer.texts_to_sequences(train_x)
-test_x = tokenizer.texts_to_sequences(test_x)
+
 # train_x = pad_sequences(train_x, maxlen=maxlen)
 # print(len(train_x))
-test_x = pad_sequences(test_x, maxlen=maxlen)
-
 print("create vector")
 embeddings_index = {}
 with open(EMBEDDING_FILE, encoding='utf8') as f:
@@ -116,15 +108,15 @@ async def check(text: str):
     test_x = tokenizer.texts_to_sequences(test_x)
     test_x = pad_sequences(test_x, maxlen=maxlen)
     predictions = model.predict([test_x], batch_size=1, verbose=1)
-    print(predictions)
+    # print(predictions)
     dict = {}
     for index, item in enumerate((predictions[0])):
         dict.update({index :item})
-    print(dict)
+    # print(dict)
     list_pred = (predictions[0])
     max_element = max(list_pred)
-    print(max_element)
-    print(type(max_element))
+    # print(max_element)
+    # print(type(max_element))
     label = get_key(max_element,dict)
     result = "Unknown"
     if label == 0 :
